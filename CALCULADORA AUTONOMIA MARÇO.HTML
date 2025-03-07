@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculadora GP Pneus Autonomia - Gerente Bruno</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 50px;
+        }
+        .container {
+            max-width: 300px;
+            margin: 0 auto;
+        }
+        label {
+            display: block;
+            margin-bottom: 10px;
+        }
+        input[type="number"] {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 20px;
+            box-sizing: border-box;
+        }
+        button {
+            width: 100%;
+            padding: 10px;
+            background-color: #28a745;
+            color: white;
+            border: none;
+            cursor: pointer;
+            margin-bottom: 10px;
+        }
+        button:hover {
+            background-color: #218838;
+        }
+        .condicoes, .quantidade-pneus, .tipo-pneu {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        .condicoes button, .quantidade-pneus button, .tipo-pneu button {
+            flex: 1;
+            padding: 10px;
+            background-color: black;
+            color: white;
+            font-size: 1em;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .condicoes button.selecionado, .quantidade-pneus button.selecionado, .tipo-pneu button.selecionado {
+            background-color: gray; /* Cor do botão selecionado */
+        }
+        .condicoes button:hover, .quantidade-pneus button:hover, .tipo-pneu button:hover {
+            background-color: #333;
+        }
+        .resultado {
+            margin-top: 20px;
+            font-size: 1.2em;
+            font-weight: bold;
+        }
+        .titulo-secao {
+            font-size: 1.1em;
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #333;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Calculadora GP Pneus Autonomia - Gerente Bruno</h1>
+    <label for="custoProduto">Custo do Produto:</label>
+    <input type="number" id="custoProduto" placeholder="Digite o custo do produto" onkeydown="if(event.key === 'Enter') calcularPrecos()">
+
+    <button onclick="calcularPrecos()">Calcular Preços</button>
+
+    <div class="tipo-pneu">
+        <div class="titulo-secao">Tipo de Pneu</div>
+        <button class="selecionado" onclick="selecionarTipoPneu('nacional')">Nacional</button>
+        <button onclick="selecionarTipoPneu('importado')">Importado</button>
+    </div>
+
+    <div class="condicoes">
+        <div class="titulo-secao">Forma de Pagamento</div>
+        <button class="selecionado" onclick="selecionarCondicao('avista')">À Vista</button>
+        <button onclick="selecionarCondicao('6x')">6x</button>
+        <button onclick="selecionarCondicao('12x')">12x</button>
+    </div>
+
+    <div class="quantidade-pneus">
+        <div class="titulo-secao">Quantidade de Pneus</div>
+        <button class="selecionado" onclick="selecionarQuantidade(1)">1</button>
+        <button onclick="selecionarQuantidade(2)">2</button>
+        <button onclick="selecionarQuantidade(3)">3</button>
+        <button onclick="selecionarQuantidade(4)">4</button>
+    </div>
+
+    <div class="resultado">
+        <p>Valor Total: <span id="valorTotal"></span></p>
+    </div>
+</div>
+
+<script>
+    let custoProduto = 0;
+    let valorAVista = 0;
+    let valor6x = 0;
+    let valor12x = 0;
+    let condicaoSelecionada = 'avista'; // Condição padrão
+    let quantidadeSelecionada = 1; // Quantidade padrão
+    let tipoPneuSelecionado = 'nacional'; // Tipo de pneu padrão
+
+    function calcularPrecos() {
+        // Obtém o valor do custo do produto
+        custoProduto = parseFloat(document.getElementById('custoProduto').value);
+
+        // Verifica se o valor é válido
+        if (isNaN(custoProduto) || custoProduto <= 0) {
+            alert("Por favor, insira um valor válido para o custo do produto.");
+            return;
+        }
+
+        // Calcula os valores com base no tipo de pneu e condições
+        if (tipoPneuSelecionado === 'nacional') {
+            valorAVista = custoProduto / 0.90; // À vista (desconto de 10%)
+            valor6x = (custoProduto / 0.90) * 1.05; // 6x (desconto de 10% + acréscimo de 5%)
+            valor12x = (custoProduto / 0.90) * 1.10; // 12x (desconto de 10% + acréscimo de 10%)
+        } else if (tipoPneuSelecionado === 'importado') {
+            valorAVista = custoProduto * 0.85; // À vista (desconto de 15%)
+            valor6x = valorAVista * 1.05; // 6x (desconto de 15% + acréscimo de 5%)
+            valor12x = valorAVista * 1.10; // 12x (desconto de 15% + acréscimo de 10%)
+        }
+
+        // Atualiza o valor total
+        atualizarValorTotal();
+    }
+
+    function selecionarCondicao(condicao) {
+        // Remove a classe 'selecionado' de todos os botões de condição
+        const botoesCondicoes = document.querySelectorAll('.condicoes button');
+        botoesCondicoes.forEach(botao => botao.classList.remove('selecionado'));
+
+        // Adiciona a classe 'selecionado' ao botão clicado
+        const botaoSelecionado = event.target;
+        botaoSelecionado.classList.add('selecionado');
+
+        // Atualiza a condição selecionada
+        condicaoSelecionada = condicao;
+
+        // Atualiza o valor total
+        atualizarValorTotal();
+    }
+
+    function selecionarQuantidade(quantidade) {
+        // Remove a classe 'selecionado' de todos os botões de quantidade
+        const botoesQuantidade = document.querySelectorAll('.quantidade-pneus button');
+        botoesQuantidade.forEach(botao => botao.classList.remove('selecionado'));
+
+        // Adiciona a classe 'selecionado' ao botão clicado
+        const botaoSelecionado = event.target;
+        botaoSelecionado.classList.add('selecionado');
+
+        // Atualiza a quantidade selecionada
+        quantidadeSelecionada = quantidade;
+
+        // Atualiza o valor total
+        atualizarValorTotal();
+    }
+
+    function selecionarTipoPneu(tipo) {
+        // Remove a classe 'selecionado' de todos os botões de tipo de pneu
+        const botoesTipoPneu = document.querySelectorAll('.tipo-pneu button');
+        botoesTipoPneu.forEach(botao => botao.classList.remove('selecionado'));
+
+        // Adiciona a classe 'selecionado' ao botão clicado
+        const botaoSelecionado = event.target;
+        botaoSelecionado.classList.add('selecionado');
+
+        // Atualiza o tipo de pneu selecionado
+        tipoPneuSelecionado = tipo;
+
+        // Recalcula os preços
+        calcularPrecos();
+    }
+
+    function atualizarValorTotal() {
+        let valorTotal = 0;
+
+        // Calcula o valor total com base na condição e quantidade selecionadas
+        switch (condicaoSelecionada) {
+            case 'avista':
+                valorTotal = valorAVista * quantidadeSelecionada;
+                break;
+            case '6x':
+                valorTotal = valor6x * quantidadeSelecionada;
+                break;
+            case '12x':
+                valorTotal = valor12x * quantidadeSelecionada;
+                break;
+        }
+
+        // Exibe o valor total
+        document.getElementById('valorTotal').innerText = "R$ " + valorTotal.toFixed(2);
+    }
+</script>
+
+</body>
+</html>
